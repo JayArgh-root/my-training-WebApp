@@ -1,8 +1,11 @@
-const CACHE_NAME = 'training-app-v1';
+const CACHE_NAME = 'training-app-v2';
 const FILES_TO_CACHE = [
   './',
   './index.html',
-  './manifest.json'
+  './manifest.json',
+  './App Icon/icon-180.png',
+  './App Icon/icon-192.png',
+  './App Icon/icon-512.png'
 ];
 
 self.addEventListener('install', (event) => {
