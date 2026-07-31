@@ -7,16 +7,18 @@
 
 <!-- iOS Home-Bildschirm / PWA -->
 <meta name="apple-mobile-web-app-capable" content="yes">
-<meta name="apple-mobile-web-app-status-bar-style" content="default">
+<meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
 <meta name="apple-mobile-web-app-title" content="Training">
 <link rel="apple-touch-icon" href="App Icon/icon-180.png">
 <link rel="icon" href="App Icon/icon-192.png" type="image/png">
 <link rel="manifest" href="manifest.json">
-<!-- iOS-Launch-Screen (nur iPhone 12 mini, 360x780pt @3x): iOS ignoriert manifest.json
-     background_color hierfuer, das ist der einzige von Apple unterstuetzte Weg. Zeigt das
-     leere Pergament (identisch zum ersten Frame des Splash-Screens) statt weissem Blitz. -->
-<link rel="apple-touch-startup-image" href="Splash screen/apple-splash-1080x2340.png"
-      media="(device-width: 360px) and (device-height: 780px) and (-webkit-device-pixel-ratio: 3)">
+<!-- iOS-Launch-Screen (iPhone 12 mini): iOS ignoriert manifest.json background_color hierfuer,
+     das ist der einzige von Apple unterstuetzte Weg. Zeigt das leere Pergament (identisch zum
+     ersten Frame des Splash-Screens) statt weissem Blitz. iPhone 12 mini rendert CSS-Media-Queries
+     unter der "Punkte-Klasse" des iPhone 11 Pro (375x812pt @3x = 1125x2436px), NICHT unter der
+     physischen Panel-Aufloesung (1080x2340) - Apples eigene Kompatibilitaets-Eigenheit. -->
+<link rel="apple-touch-startup-image" href="Splash screen/apple-splash-1125x2436.png"
+      media="(device-width: 375px) and (device-height: 812px) and (-webkit-device-pixel-ratio: 3)">
 <meta name="theme-color" content="#cbb897">
 
 <style>
@@ -39,6 +41,16 @@
     color: var(--text);
     font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif;
   }
+  /* body bekommt einen eigenen Stacking-Context (position:relative), damit #page-bg
+     mit negativem z-index nicht gegen den Wurzel-/Canvas-Stacking-Context arbeitet -
+     dort kommt es auf iOS Safari vereinzelt vor, dass ein fixed-Element mit negativem
+     z-index gar nicht gerendert wird, gerade wenn andere fixed-Elemente (unser Splash)
+     zwischenzeitlich ein-/ausgeblendet werden. Innerhalb eines eigenen, lokalen
+     Stacking-Contexts arbeitet dieselbe negative-z-index-Technik zuverlässig. */
+  body {
+    position: relative;
+    z-index: 0;
+  }
   /* Eigenes fixiertes Hintergrund-Element statt background-attachment:fixed auf body:
      iOS Safari setzt beim Rubber-Band-Overscroll einen fixed *background* nicht korrekt
      fort (zeigt dort Weiß). Ein echtes position:fixed-Element wird dagegen zuverlässig
@@ -47,6 +59,7 @@
     position: fixed;
     inset: 0;
     z-index: -1;
+    -webkit-transform: translateZ(0); /* erzwingt eigene Compositing-Ebene */
     background: var(--bg-image) center / cover no-repeat;
   }
   body {
