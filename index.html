@@ -12,6 +12,11 @@
 <link rel="apple-touch-icon" href="App Icon/icon-180.png">
 <link rel="icon" href="App Icon/icon-192.png" type="image/png">
 <link rel="manifest" href="manifest.json">
+<!-- iOS-Launch-Screen (nur iPhone 12 mini, 360x780pt @3x): iOS ignoriert manifest.json
+     background_color hierfuer, das ist der einzige von Apple unterstuetzte Weg. Zeigt das
+     leere Pergament (identisch zum ersten Frame des Splash-Screens) statt weissem Blitz. -->
+<link rel="apple-touch-startup-image" href="Splash screen/apple-splash-1080x2340.png"
+      media="(device-width: 360px) and (device-height: 780px) and (-webkit-device-pixel-ratio: 3)">
 <meta name="theme-color" content="#cbb897">
 
 <style>
@@ -30,9 +35,19 @@
   html, body {
     margin: 0;
     padding: 0;
-    background: var(--bg-image) center / cover no-repeat fixed;
+    background-color: #c9b291; /* Fallback, das eigentliche Bild liefert #page-bg */
     color: var(--text);
     font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif;
+  }
+  /* Eigenes fixiertes Hintergrund-Element statt background-attachment:fixed auf body:
+     iOS Safari setzt beim Rubber-Band-Overscroll einen fixed *background* nicht korrekt
+     fort (zeigt dort Weiß). Ein echtes position:fixed-Element wird dagegen zuverlässig
+     auch im Überzieh-Bereich dargestellt. */
+  #page-bg {
+    position: fixed;
+    inset: 0;
+    z-index: -1;
+    background: var(--bg-image) center / cover no-repeat;
   }
   body {
     padding: 0 16px calc(env(safe-area-inset-bottom) + 24px) 16px;
@@ -92,7 +107,7 @@
     position: fixed;
     inset: 0;
     z-index: 9999;
-    background-color: #c9b291; /* Fallback, falls die Bilder nicht laden */
+    background: #c9b291 var(--bg-image) center / cover no-repeat;
   }
   #splash-svg {
     width: 100%;
@@ -208,13 +223,15 @@
 </head>
 <body>
 
+<div id="page-bg" aria-hidden="true"></div>
+
 <div id="splash" aria-hidden="true">
+  <!-- Pergament-Hintergrund kommt jetzt als CSS-background auf #splash (siehe <style>),
+       damit er stets randlos abdeckt, unabhängig vom viewBox-"meet" der Figur darunter. -->
   <svg id="splash-svg" viewBox="0 0 568 1020" preserveAspectRatio="xMidYMid meet">
-    <!-- Ebene 1: leeres Pergament, sofort und vollflächig sichtbar -->
-    <image href="Splash screen/bg-full.png" x="0" y="0" width="568" height="1020" />
-    <!-- Ebene 2 + 3: Person, Quadrat, Kreis - das wandert später gemeinsam zum Logo -->
+    <!-- Person, Quadrat, Kreis - das wandert später gemeinsam zum Logo -->
     <g id="icon-group">
-      <image id="splash-person" href="Splash screen/person-icon.png" x="20" y="246" width="530" height="530" />
+      <image id="splash-person" href="Splash screen/person-icon-transparent.png" x="20" y="246" width="530" height="530" />
       <rect id="splash-square" class="draw-line" x="80" y="350" width="408" height="408" />
       <circle id="splash-circle" class="draw-line" cx="285.5" cy="511.5" r="244.9" />
     </g>

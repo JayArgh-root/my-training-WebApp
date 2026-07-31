@@ -1,4 +1,4 @@
-const CACHE_NAME = 'training-app-v16';
+const CACHE_NAME = 'training-app-v19';
 const FILES_TO_CACHE = [
   './',
   './index.html',
@@ -7,8 +7,8 @@ const FILES_TO_CACHE = [
   './App Icon/icon-192.png',
   './App Icon/icon-512.png',
   './Splash screen/bg-full.png',
-  './Splash screen/person-icon.png',
-  './Splash screen/logo-icon.png'
+  './Splash screen/person-icon-transparent.png',
+  './Splash screen/apple-splash-1080x2340.png'
 ];
 
 self.addEventListener('install', (event) => {
