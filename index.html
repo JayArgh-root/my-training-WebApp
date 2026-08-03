@@ -31,6 +31,7 @@
     --text: #34373a;
     --muted: #6b6f73;
     --done: #dbe8d6;
+    --section-bg: #95ddbe;
     --line: rgba(52,55,58,0.28);
   }
   * { box-sizing: border-box; -webkit-tap-highlight-color: transparent; }
@@ -75,7 +76,7 @@
     right: 0;
     z-index: 500;
     background: var(--header-bg);
-    padding: calc(env(safe-area-inset-top) + 16px) 16px 14px 16px;
+    padding: calc(env(safe-area-inset-top) + 10px) 16px 8px 16px;
     text-align: center;
     border-bottom: 1px solid var(--line);
     box-shadow: 0 6px 10px -4px rgba(30, 24, 14, 0.35);
@@ -84,15 +85,15 @@
     display: flex;
     align-items: center;
     justify-content: center;
-    gap: 12px;
+    gap: 10px;
     max-width: 560px;
     margin: 0 auto;
   }
   .logo-slot {
-    flex: 0 0 60px;
-    width: 60px;
-    height: 60px;
-    border-radius: 13px;
+    flex: 0 0 46px;
+    width: 46px;
+    height: 46px;
+    border-radius: 11px;
     overflow: hidden;
     box-shadow: 0 2px 6px rgba(30, 24, 14, 0.4);
   }
@@ -106,13 +107,13 @@
     text-align: left;
   }
   header h1 {
-    font-size: 1.3rem;
-    margin: 0 0 4px 0;
+    font-size: 1.1rem;
+    margin: 0 0 2px 0;
     color: var(--text);
   }
   header .date {
     color: var(--muted);
-    font-size: 0.85rem;
+    font-size: 0.78rem;
   }
 
   /* ---------- Splash Screen ---------- */
@@ -144,8 +145,8 @@
   }
   .day-badge {
     display: inline-block;
-    margin-top: 10px;
-    padding: 6px 16px;
+    margin-top: 6px;
+    padding: 4px 14px;
     border-radius: 999px;
     background: var(--accent);
     color: #06231a;
@@ -153,37 +154,72 @@
     font-size: 0.95rem;
   }
   .progress {
-    margin-top: 10px;
+    margin-top: 6px;
     color: var(--muted);
     font-size: 0.85rem;
   }
-  section {
+  section.section-box {
     margin-top: 22px;
+    background: var(--section-bg);
+    border-radius: 16px;
+    padding: 14px 14px 6px 14px;
   }
-  section h2 {
+  .section-header {
+    display: flex;
+    align-items: center;
+    gap: 10px;
+    margin: 0 0 10px 4px;
+  }
+  .section-header h2 {
+    flex: 1;
     font-size: 1rem;
-    color: var(--muted);
+    color: var(--text);
     text-transform: uppercase;
     letter-spacing: 0.05em;
-    margin: 0 0 8px 4px;
+    font-weight: 700;
+    margin: 0;
+  }
+  .collapse-btn {
+    flex: 0 0 auto;
+    background: none;
+    border: none;
+    padding: 4px;
+    margin: 0 4px 0 0;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    color: var(--text);
+    cursor: pointer;
+  }
+  .collapse-btn .chevron {
+    transition: transform 180ms ease;
+  }
+  .section-box.collapsed .collapse-btn .chevron {
+    transform: rotate(-90deg);
+  }
+  .section-box.collapsed ul.exercise-list {
+    display: none;
   }
   ul.exercise-list {
     list-style: none;
     margin: 0;
     padding: 0;
-    background: var(--card);
+    background: transparent;
     border-radius: 14px;
     overflow: hidden;
   }
   li.exercise {
-    display: flex;
-    align-items: center;
+    display: block;
     padding: 14px 14px;
     border-bottom: 1px solid rgba(52,55,58,0.1);
-    gap: 12px;
+    background: var(--done);
   }
   li.exercise:last-child { border-bottom: none; }
-  li.exercise.done { background: var(--done); }
+  .exercise-row {
+    display: flex;
+    align-items: center;
+    gap: 12px;
+  }
   .checkbox {
     flex: 0 0 26px;
     width: 26px;
@@ -196,29 +232,103 @@
     font-size: 1rem;
     color: transparent;
   }
-  li.exercise.done .checkbox {
+  li.exercise.done .checkbox,
+  .checkbox.checked {
     background: var(--accent);
     border-color: var(--accent);
     color: #06231a;
   }
   .exercise-info { flex: 1; min-width: 0; }
+  .name-row {
+    display: flex;
+    align-items: center;
+    gap: 6px;
+  }
   .exercise-name {
     font-size: 1rem;
     font-weight: 500;
     text-decoration: none;
     color: var(--text);
   }
-  li.exercise.done .exercise-name {
+  .link-icon {
+    flex: 0 0 auto;
+    display: inline-flex;
     color: var(--muted);
-    text-decoration: line-through;
   }
-  .exercise-name.has-link { color: var(--accent); }
-  li.exercise.done .exercise-name.has-link { color: var(--muted); }
   .exercise-detail {
     display: block;
     font-size: 0.85rem;
     color: var(--muted);
     margin-top: 2px;
+  }
+  .timer-toggle-btn {
+    flex: 0 0 auto;
+    display: flex;
+    align-items: center;
+    gap: 1px;
+    background: none;
+    border: none;
+    padding: 4px;
+    margin: 0;
+    color: var(--muted);
+    cursor: pointer;
+  }
+  .timer-toggle-btn .chevron {
+    transition: transform 180ms ease;
+    transform: rotate(-90deg);
+  }
+  .timer-toggle-btn.expanded .chevron {
+    transform: rotate(0deg);
+  }
+  .timer-panel {
+    display: none;
+    margin-top: 14px;
+    padding-top: 14px;
+    border-top: 1px solid rgba(52,55,58,0.15);
+  }
+  li.exercise.timer-open .timer-panel {
+    display: block;
+  }
+  .timer-display {
+    font-size: 7.5rem;
+    font-weight: 700;
+    text-align: center;
+    font-variant-numeric: tabular-nums;
+    letter-spacing: 0.02em;
+    color: var(--text);
+    margin-bottom: 14px;
+    border-radius: 14px;
+    background: transparent;
+    transition: background-color 200ms ease;
+  }
+  .timer-display.target-reached {
+    background: #4fd1a5;
+  }
+  .timer-buttons {
+    display: flex;
+    gap: 10px;
+  }
+  .timer-buttons button {
+    flex: 1;
+    padding: 14px;
+    border-radius: 12px;
+    font-size: 1rem;
+    font-weight: 600;
+    border: none;
+    cursor: pointer;
+  }
+  .timer-startstop {
+    background: var(--accent);
+    color: #06231a;
+  }
+  .timer-startstop.running {
+    background: #d64f4f;
+    color: #fff;
+  }
+  .timer-buttons button.timer-reset {
+    background: none;
+    border: 1.5px solid rgba(52,55,58,0.45);
+    color: var(--muted);
   }
   footer {
     margin-top: 30px;
@@ -263,13 +373,25 @@
   <div class="progress" id="progress-text"></div>
 </header>
 
-<section>
-  <h2>Warm-up (täglich)</h2>
+<section class="section-box" id="warmup-section">
+  <div class="section-header">
+    <div class="checkbox section-checkbox" data-section="warmup" role="button" aria-label="Alle Warm-up-Übungen abhaken">✓</div>
+    <h2>Warm-up</h2>
+    <button class="collapse-btn" type="button" data-target="warmup-section" aria-label="Bereich auf-/zuklappen">
+      <svg class="chevron" viewBox="0 0 20 20" width="18" height="18" aria-hidden="true"><path d="M5 7l5 5 5-5" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"/></svg>
+    </button>
+  </div>
   <ul class="exercise-list" id="warmup-list"></ul>
 </section>
 
-<section>
-  <h2 id="day-section-title">Heutiges Training</h2>
+<section class="section-box" id="day-section">
+  <div class="section-header">
+    <div class="checkbox section-checkbox" data-section="day" role="button" aria-label="Alle heutigen Übungen abhaken">✓</div>
+    <h2 id="day-section-title">Heutiges Training</h2>
+    <button class="collapse-btn" type="button" data-target="day-section" aria-label="Bereich auf-/zuklappen">
+      <svg class="chevron" viewBox="0 0 20 20" width="18" height="18" aria-hidden="true"><path d="M5 7l5 5 5-5" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"/></svg>
+    </button>
+  </div>
   <ul class="exercise-list" id="day-list"></ul>
 </section>
 
@@ -280,7 +402,8 @@
 <script>
 // ---------- Daten ----------
 const warmup = [
-  { id: 'w1', name: "Haltung des Kindes", detail: "1 Min", link: "https://www.fitkurs.de/uebungen/stellung-des-kindes/" },
+  { id: 'w0', name: "Plank", detail: "2 Min", link: "https://www.fitkurs.de/uebungen/unterarmstuetz/", timed: true, targetSec: 120 },
+  { id: 'w1', name: "Haltung des Kindes", detail: "1 Min", link: "https://www.fitkurs.de/uebungen/stellung-des-kindes/", timed: true, targetSec: 60 },
   { id: 'w2', name: "Kobra", detail: "15 Sek" },
   { id: 'w3', name: "Katze-Kuh", detail: "10 Wdh.", link: "https://www.fitkurs.de/uebungen/katze-kuh/" },
   { id: 'w4', name: "Morning Stretch", detail: "30 Sek" },
@@ -290,31 +413,28 @@ const warmup = [
 
 const days = {
   A: {
-    label: "Tag A – Push",
+    label: "Push",
     exercises: [
-      { id: 'a1', name: "Plank", detail: "2 Min", link: "https://www.fitkurs.de/uebungen/unterarmstuetz/" },
-      { id: 'a2', name: "Seitliche Plank", detail: "45 Sek/Seite", link: "https://www.fitkurs.de/uebungen/seitlicher-unterarmstuetz-einsteiger/" },
+      { id: 'a2', name: "Seitliche Plank", detail: "1 Min/Seite", link: "https://www.fitkurs.de/uebungen/seitlicher-unterarmstuetz-einsteiger/", timed: true, targetSec: 60 },
       { id: 'a3', name: "Liegestütze", detail: "3 Sätze", link: "https://www.fitkurs.de/uebungen/liegestuetze/" },
       { id: 'a4', name: "Pallof Press", detail: "2 Sätze x 10-12/Seite", link: "https://www.fitbook.de/fitness/pallof-press-effektiver-als-plank" },
     ]
   },
   B: {
-    label: "Tag B – Pull",
+    label: "Pull",
     exercises: [
-      { id: 'b1', name: "Plank", detail: "2 Min", link: "https://www.fitkurs.de/uebungen/unterarmstuetz/" },
       { id: 'b2', name: "Klimmzüge", detail: "3 Sätze", link: "https://www.marathonfitness.de/klimmzuege-lernen/" },
       { id: 'b3', name: "Pallof Press", detail: "2 Sätze x 10-12/Seite", link: "https://www.fitbook.de/fitness/pallof-press-effektiver-als-plank" },
       { id: 'b4', name: "Superman Pulls", detail: "2-3 Sätze x 10-12", link: "https://www.fitkurs.de/uebungen/supermann/" },
     ]
   },
   C: {
-    label: "Tag C – Beine",
+    label: "Beine",
     exercises: [
-      { id: 'c1', name: "Plank", detail: "2 Min", link: "https://www.fitkurs.de/uebungen/unterarmstuetz/" },
-      { id: 'c2', name: "Seitliche Plank", detail: "45 Sek/Seite", link: "https://www.fitkurs.de/uebungen/seitlicher-unterarmstuetz-einsteiger/" },
+      { id: 'c2', name: "Seitliche Plank", detail: "1 Min/Seite", link: "https://www.fitkurs.de/uebungen/seitlicher-unterarmstuetz-einsteiger/", timed: true, targetSec: 60 },
       { id: 'c3', name: "Kniebeugen", detail: "3 Sätze x 15-20", link: "https://dieringe.com/de/exercises/kniebeugen" },
       { id: 'c4', name: "Ausfallschritte", detail: "2-3 Sätze x 10/Bein", link: "https://dieringe.com/de/exercises/ausfallschritte" },
-      { id: 'c5', name: "Glute Bridge", detail: "1 Min fix, dann 3 Sätze x 15-20", link: "https://www.fitkurs.de/uebungen/beckenheben/" },
+      { id: 'c5', name: "Glute Bridge", detail: "1 Min isometrisch / 1 Min dynamisch", link: "https://www.fitkurs.de/uebungen/beckenheben/", timed: true, targetSec: 60 },
       { id: 'c6', name: "Pallof Press im Ausfallschritt", detail: "2 Sätze x 10-12/Seite", link: "https://www.fitbook.de/fitness/pallof-press-effektiver-als-plank" },
     ]
   }
@@ -383,12 +503,19 @@ function resetToday() {
 }
 
 // ---------- Rendering ----------
-function renderList(container, items, progress) {
+const LINK_ICON_SVG = '<svg viewBox="0 0 20 20" width="14" height="14" aria-hidden="true"><path d="M8 5H5a1 1 0 00-1 1v9a1 1 0 001 1h9a1 1 0 001-1v-3M12 4h4v4M9 11l7-7" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round"/></svg>';
+const CLOCK_ICON_SVG = '<svg viewBox="0 0 20 20" width="15" height="15" aria-hidden="true"><circle cx="10" cy="10" r="7.5" fill="none" stroke="currentColor" stroke-width="1.6"/><path d="M10 6v4l3 2" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round"/></svg>';
+const CHEVRON_SVG = '<svg class="chevron" viewBox="0 0 20 20" width="16" height="16" aria-hidden="true"><path d="M5 7l5 5 5-5" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"/></svg>';
+
+function renderList(container, items, progress, sectionKey) {
   container.innerHTML = '';
   items.forEach(ex => {
     const li = document.createElement('li');
     li.className = 'exercise' + (progress[ex.id] ? ' done' : '');
     li.dataset.id = ex.id;
+
+    const row = document.createElement('div');
+    row.className = 'exercise-row';
 
     const box = document.createElement('div');
     box.className = 'checkbox';
@@ -397,38 +524,226 @@ function renderList(container, items, progress) {
     const info = document.createElement('div');
     info.className = 'exercise-info';
 
-    let nameEl;
-    if (ex.link) {
-      nameEl = document.createElement('a');
-      nameEl.href = ex.link;
-      nameEl.target = '_blank';
-      nameEl.rel = 'noopener';
-      nameEl.className = 'exercise-name has-link';
-      nameEl.addEventListener('click', (e) => e.stopPropagation());
-    } else {
-      nameEl = document.createElement('span');
-      nameEl.className = 'exercise-name';
-    }
+    const nameRow = document.createElement('div');
+    nameRow.className = 'name-row';
+
+    const nameEl = document.createElement('span');
+    nameEl.className = 'exercise-name';
     nameEl.textContent = ex.name;
+    nameRow.appendChild(nameEl);
+
+    if (ex.link) {
+      const linkIcon = document.createElement('a');
+      linkIcon.href = ex.link;
+      linkIcon.target = '_blank';
+      linkIcon.rel = 'noopener';
+      linkIcon.className = 'link-icon';
+      linkIcon.setAttribute('aria-label', 'Anleitung öffnen (externer Link)');
+      linkIcon.innerHTML = LINK_ICON_SVG;
+      linkIcon.addEventListener('click', (e) => e.stopPropagation());
+      nameRow.appendChild(linkIcon);
+    }
 
     const detail = document.createElement('span');
     detail.className = 'exercise-detail';
     detail.textContent = ex.detail;
 
-    info.appendChild(nameEl);
+    info.appendChild(nameRow);
     info.appendChild(detail);
-    li.appendChild(box);
-    li.appendChild(info);
+    row.appendChild(box);
+    row.appendChild(info);
 
-    li.addEventListener('click', () => {
+    if (ex.timed) {
+      const timerToggleBtn = document.createElement('button');
+      timerToggleBtn.type = 'button';
+      timerToggleBtn.className = 'timer-toggle-btn';
+      timerToggleBtn.setAttribute('aria-label', 'Stoppuhr ein-/ausblenden');
+      timerToggleBtn.innerHTML = CLOCK_ICON_SVG + CHEVRON_SVG;
+      row.appendChild(timerToggleBtn);
+
+      const panel = document.createElement('div');
+      panel.className = 'timer-panel';
+
+      const displayEl = document.createElement('div');
+      displayEl.className = 'timer-display';
+      displayEl.textContent = '00:00';
+
+      const buttonsRow = document.createElement('div');
+      buttonsRow.className = 'timer-buttons';
+
+      const startStopBtn = document.createElement('button');
+      startStopBtn.type = 'button';
+      startStopBtn.className = 'timer-startstop';
+      startStopBtn.textContent = 'Start';
+
+      const resetBtn = document.createElement('button');
+      resetBtn.type = 'button';
+      resetBtn.className = 'timer-reset';
+      resetBtn.textContent = 'Reset';
+
+      buttonsRow.appendChild(startStopBtn);
+      buttonsRow.appendChild(resetBtn);
+      panel.appendChild(displayEl);
+      panel.appendChild(buttonsRow);
+
+      registerTimer(ex.id, { displayEl, startStopBtnEl: startStopBtn, targetMs: ex.targetSec ? ex.targetSec * 1000 : null });
+
+      timerToggleBtn.addEventListener('click', (e) => {
+        e.stopPropagation();
+        const isOpen = li.classList.toggle('timer-open');
+        timerToggleBtn.classList.toggle('expanded', isOpen);
+        if (!isOpen) {
+          stopTimer(ex.id);
+        }
+      });
+
+      startStopBtn.addEventListener('click', () => {
+        const st = getTimerState(ex.id);
+        if (st.running) { stopTimer(ex.id); } else { startTimer(ex.id); }
+      });
+
+      resetBtn.addEventListener('click', () => {
+        resetTimer(ex.id);
+      });
+
+      li.appendChild(row);
+      li.appendChild(panel);
+    } else {
+      li.appendChild(row);
+    }
+
+    row.addEventListener('click', () => {
       const nowDone = !li.classList.contains('done');
       li.classList.toggle('done', nowDone);
       setExerciseDone(ex.id, nowDone);
       updateProgressText();
+      if (sectionKey) updateSectionCheckbox(sectionKey);
     });
 
     container.appendChild(li);
   });
+}
+
+// ---------- Stoppuhr ----------
+const timerStates = {};
+let wakeLock = null;
+
+function getTimerState(id) {
+  if (!timerStates[id]) {
+    timerStates[id] = { running: false, elapsedMs: 0, startedAt: 0, intervalId: null, displayEl: null, startStopBtnEl: null, targetMs: null };
+  }
+  return timerStates[id];
+}
+
+function registerTimer(id, refs) {
+  const st = getTimerState(id);
+  st.displayEl = refs.displayEl;
+  st.startStopBtnEl = refs.startStopBtnEl;
+  st.targetMs = refs.targetMs || null;
+}
+
+function formatTime(ms) {
+  const totalSec = Math.floor(ms / 1000);
+  const m = Math.floor(totalSec / 60);
+  const s = totalSec % 60;
+  return String(m).padStart(2, '0') + ':' + String(s).padStart(2, '0');
+}
+
+function updateTimerDisplay(id) {
+  const st = timerStates[id];
+  if (!st || !st.displayEl) return;
+  const current = st.running ? st.elapsedMs + (Date.now() - st.startedAt) : st.elapsedMs;
+  st.displayEl.textContent = formatTime(current);
+  const reached = st.targetMs != null && current >= st.targetMs;
+  st.displayEl.classList.toggle('target-reached', reached);
+}
+
+function updateTimerButton(id) {
+  const st = timerStates[id];
+  if (!st || !st.startStopBtnEl) return;
+  st.startStopBtnEl.textContent = st.running ? 'Stopp' : 'Start';
+  st.startStopBtnEl.classList.toggle('running', st.running);
+}
+
+function anyTimerRunning() {
+  return Object.values(timerStates).some(st => st.running);
+}
+
+async function requestWakeLock() {
+  if (!('wakeLock' in navigator)) return;
+  if (wakeLock) return;
+  try {
+    wakeLock = await navigator.wakeLock.request('screen');
+    wakeLock.addEventListener('release', () => { wakeLock = null; });
+  } catch (e) {
+    // z.B. Akkusparmodus oder Berechtigung verweigert - Stoppuhr funktioniert trotzdem weiter
+  }
+}
+
+async function releaseWakeLockIfIdle() {
+  if (anyTimerRunning() || !wakeLock) return;
+  try {
+    await wakeLock.release();
+  } catch (e) {
+    // ignorieren
+  }
+  wakeLock = null;
+}
+
+document.addEventListener('visibilitychange', () => {
+  if (document.visibilityState === 'visible' && anyTimerRunning()) {
+    requestWakeLock();
+  }
+});
+
+function startTimer(id) {
+  const st = getTimerState(id);
+  if (st.running) return;
+  st.running = true;
+  st.startedAt = Date.now();
+  st.intervalId = setInterval(() => updateTimerDisplay(id), 250);
+  requestWakeLock();
+  updateTimerButton(id);
+}
+
+function stopTimer(id) {
+  const st = timerStates[id];
+  if (!st || !st.running) return;
+  st.elapsedMs += Date.now() - st.startedAt;
+  st.running = false;
+  if (st.intervalId) clearInterval(st.intervalId);
+  st.intervalId = null;
+  updateTimerDisplay(id);
+  updateTimerButton(id);
+  releaseWakeLockIfIdle();
+}
+
+function resetTimer(id) {
+  const st = timerStates[id];
+  if (!st) return;
+  if (st.intervalId) clearInterval(st.intervalId);
+  st.running = false;
+  st.intervalId = null;
+  st.elapsedMs = 0;
+  st.startedAt = 0;
+  updateTimerDisplay(id);
+  updateTimerButton(id);
+  releaseWakeLockIfIdle();
+}
+
+function getSectionItems(sectionKey) {
+  if (sectionKey === 'warmup') return warmup;
+  if (sectionKey === 'day') return days[getTodayLetter()].exercises;
+  return [];
+}
+
+function updateSectionCheckbox(sectionKey) {
+  const checkboxEl = document.querySelector(`.section-checkbox[data-section="${sectionKey}"]`);
+  if (!checkboxEl) return;
+  const items = getSectionItems(sectionKey);
+  const progress = getTodayProgress();
+  const allDone = items.length > 0 && items.every(ex => progress[ex.id]);
+  checkboxEl.classList.toggle('checked', allDone);
 }
 
 function updateProgressText() {
@@ -451,15 +766,53 @@ function render() {
   document.getElementById('day-badge').textContent = dayData.label;
   document.getElementById('day-section-title').textContent = dayData.label;
 
-  renderList(document.getElementById('warmup-list'), warmup, progress);
-  renderList(document.getElementById('day-list'), dayData.exercises, progress);
+  renderList(document.getElementById('warmup-list'), warmup, progress, 'warmup');
+  renderList(document.getElementById('day-list'), dayData.exercises, progress, 'day');
   updateProgressText();
+  updateSectionCheckbox('warmup');
+  updateSectionCheckbox('day');
 }
 
 document.getElementById('reset-btn').addEventListener('click', () => {
   if (confirm('Heutige Häkchen wirklich zurücksetzen?')) {
     resetToday();
   }
+});
+
+document.querySelectorAll('.section-checkbox').forEach(cb => {
+  cb.addEventListener('click', () => {
+    const sectionKey = cb.dataset.section;
+    const items = getSectionItems(sectionKey);
+    if (!items.length) return;
+    const progress = getTodayProgress();
+    const allDone = items.every(ex => progress[ex.id]);
+    const newState = !allDone;
+    items.forEach(ex => setExerciseDone(ex.id, newState));
+
+    const listId = sectionKey === 'warmup' ? 'warmup-list' : 'day-list';
+    const listEl = document.getElementById(listId);
+    if (listEl) {
+      listEl.querySelectorAll('li.exercise').forEach(li => li.classList.toggle('done', newState));
+    }
+    cb.classList.toggle('checked', newState);
+    updateProgressText();
+  });
+});
+
+document.querySelectorAll('.collapse-btn').forEach(btn => {
+  btn.addEventListener('click', () => {
+    const box = document.getElementById(btn.dataset.target);
+    if (!box) return;
+    const nowCollapsed = box.classList.toggle('collapsed');
+    if (nowCollapsed) {
+      box.querySelectorAll('li.exercise.timer-open').forEach(li => {
+        stopTimer(li.dataset.id);
+        li.classList.remove('timer-open');
+        const toggleBtn = li.querySelector('.timer-toggle-btn');
+        if (toggleBtn) toggleBtn.classList.remove('expanded');
+      });
+    }
+  });
 });
 
 render();
@@ -507,10 +860,10 @@ window.addEventListener('resize', syncHeaderHeight);
   personImg.style.transition = 'opacity 1400ms ease';
   setTimeout(() => { personImg.style.opacity = '1'; }, 50);
 
-  drawIn(square, 300, 1600);
-  drawIn(circle, 300, 1900);
+  drawIn(square, 300, 500);
+  drawIn(circle, 300, 800);
 
-  setTimeout(moveToLogo, 2600); // Kreis fertig bei 2200ms + 400ms Pause
+  setTimeout(moveToLogo, 1500); // Kreis fertig bei 1100ms + 400ms Pause; startet bewusst, bevor die Person (Fade-in bis ~1450ms) vollständig eingeblendet ist
 
   function moveToLogo() {
     if (!logoSlot) { finishSplash(); return; }
