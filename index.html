@@ -285,12 +285,15 @@
     margin-top: 14px;
     padding-top: 14px;
     border-top: 1px solid rgba(52,55,58,0.15);
+    container-type: inline-size;
   }
   li.exercise.timer-open .timer-panel {
     display: block;
   }
   .timer-display {
-    font-size: clamp(3rem, 20vw, 7.5rem);
+    font-size: clamp(2.5rem, 22cqi, 7.5rem);
+    width: 100%;
+    overflow: hidden;
     white-space: nowrap;
     font-weight: 700;
     text-align: center;
@@ -593,7 +596,9 @@ function renderList(container, items, progress, sectionKey) {
         e.stopPropagation();
         const isOpen = li.classList.toggle('timer-open');
         timerToggleBtn.classList.toggle('expanded', isOpen);
-        if (!isOpen) {
+        if (isOpen) {
+          fitTimerDisplay(displayEl);
+        } else {
           stopTimer(ex.id);
         }
       });
@@ -648,6 +653,22 @@ function formatTime(ms) {
   const m = Math.floor(totalSec / 60);
   const s = totalSec % 60;
   return String(m).padStart(2, '0') + ':' + String(s).padStart(2, '0');
+}
+
+function fitTimerDisplay(el) {
+  // Sicherheitsnetz zusätzlich zur CSS-Container-Query-Größe: verkleinert die
+  // Schrift in kleinen Schritten, bis "00:00" garantiert in die verfügbare
+  // Breite passt - unabhängig von iOS-Eigenheiten bei vw/cqi-Berechnungen.
+  el.style.fontSize = '';
+  requestAnimationFrame(() => {
+    let size = parseFloat(getComputedStyle(el).fontSize);
+    let guard = 0;
+    while (el.scrollWidth > el.clientWidth && size > 24 && guard < 30) {
+      size -= 2;
+      el.style.fontSize = size + 'px';
+      guard++;
+    }
+  });
 }
 
 function updateTimerDisplay(id) {
