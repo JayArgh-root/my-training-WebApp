@@ -659,24 +659,30 @@ function fitTimerDisplay(el) {
   // Ermittelt per Bisektion die größtmögliche Schriftgröße, mit der "00:00"
   // gerade noch (mit kleinem Puffer) in die verfügbare Breite passt - füllt die
   // Zeile so weit wie möglich, ohne abgeschnitten zu werden, unabhängig von
-  // CSS-vw/cqi-Schätzungen.
+  // CSS-vw/cqi-Schätzungen. Doppeltes requestAnimationFrame, damit das Layout
+  // nach dem Einblenden des Panels (display:none -> block) sicher fertig steht,
+  // und die Breite des umgebenden Panels statt der Anzeige selbst als Referenz,
+  // um Messfehler durch overflow:hidden auf der Anzeige auszuschließen.
   requestAnimationFrame(() => {
-    const containerWidth = el.clientWidth;
-    if (!containerWidth) return;
-    let lo = 24;
-    let hi = 200;
-    let best = lo;
-    for (let i = 0; i < 14; i++) {
-      const mid = (lo + hi) / 2;
-      el.style.fontSize = mid + 'px';
-      if (el.scrollWidth <= containerWidth * 0.97) {
-        best = mid;
-        lo = mid;
-      } else {
-        hi = mid;
+    requestAnimationFrame(() => {
+      const panel = el.parentElement;
+      const containerWidth = (panel || el).getBoundingClientRect().width;
+      if (!containerWidth) return;
+      let lo = 24;
+      let hi = 200;
+      let best = lo;
+      for (let i = 0; i < 16; i++) {
+        const mid = (lo + hi) / 2;
+        el.style.fontSize = mid + 'px';
+        if (el.scrollWidth <= containerWidth * 0.96) {
+          best = mid;
+          lo = mid;
+        } else {
+          hi = mid;
+        }
       }
-    }
-    el.style.fontSize = best + 'px';
+      el.style.fontSize = best + 'px';
+    });
   });
 }
 
