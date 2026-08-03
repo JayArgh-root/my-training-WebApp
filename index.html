@@ -817,7 +817,12 @@ document.querySelectorAll('.collapse-btn').forEach(btn => {
 
 render();
 
-// Fixierten Header-Bereich exakt so hoch reservieren, wie er tatsächlich ist
+// Fixierten Header-Bereich exakt so hoch reservieren, wie er tatsächlich ist.
+// Läuft nicht nur einmalig, sondern beobachtet den Header laufend: auf iOS kann sich
+// seine tatsächliche Höhe nach dem ersten Messen noch leicht verschieben (Safe-Area/
+// Dynamic-Island-Timing, Zeilenumbruch bei Datum/Tag-Badge) - eine einmalige Messung
+// führte dazu, dass der Seiteninhalt knapp zu weit oben startete und teilweise unter
+// dem fixierten Header verschwand.
 function syncHeaderHeight() {
   const header = document.querySelector('header');
   if (header) {
@@ -826,6 +831,14 @@ function syncHeaderHeight() {
 }
 syncHeaderHeight();
 window.addEventListener('resize', syncHeaderHeight);
+window.addEventListener('orientationchange', syncHeaderHeight);
+window.addEventListener('pageshow', syncHeaderHeight);
+if ('ResizeObserver' in window) {
+  const headerEl = document.querySelector('header');
+  if (headerEl) {
+    new ResizeObserver(syncHeaderHeight).observe(headerEl);
+  }
+}
 
 // ---------- Splash-Screen-Animation ----------
 (function runSplash() {
