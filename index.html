@@ -657,30 +657,46 @@ function formatTime(ms) {
 
 function fitTimerDisplay(el) {
   // Ermittelt per Bisektion die größtmögliche Schriftgröße, mit der "00:00"
-  // gerade noch (mit kleinem Puffer) in die verfügbare Breite passt - füllt die
-  // Zeile so weit wie möglich, ohne abgeschnitten zu werden, unabhängig von
-  // CSS-vw/cqi-Schätzungen. Doppeltes requestAnimationFrame, damit das Layout
-  // nach dem Einblenden des Panels (display:none -> block) sicher fertig steht,
-  // und die Breite des umgebenden Panels statt der Anzeige selbst als Referenz,
-  // um Messfehler durch overflow:hidden auf der Anzeige auszuschließen.
+  // gerade noch (mit kleinem Puffer) in die verfügbare Breite passt.
+  // WICHTIG: el selbst hat width:100% und ist daher IMMER so breit wie das
+  // Panel - el.scrollWidth ist deshalb ungeeignet zum Messen (bleibt bei
+  // nicht-überlaufendem Text gleich el.clientWidth, schrumpft nie mit der
+  // Schrift). Stattdessen misst ein unsichtbares, frei fließendes Hilfselement
+  // (ohne width:100%-Zwang) die tatsächliche Textbreite je Kandidatengröße.
   requestAnimationFrame(() => {
     requestAnimationFrame(() => {
       const panel = el.parentElement;
       const containerWidth = (panel || el).getBoundingClientRect().width;
       if (!containerWidth) return;
-      let lo = 24;
-      let hi = 200;
+
+      const cs = getComputedStyle(el);
+      const probe = document.createElement('span');
+      probe.style.position = 'absolute';
+      probe.style.left = '-9999px';
+      probe.style.top = '0';
+      probe.style.visibility = 'hidden';
+      probe.style.whiteSpace = 'nowrap';
+      probe.style.fontFamily = cs.fontFamily;
+      probe.style.fontWeight = cs.fontWeight;
+      probe.style.letterSpacing = cs.letterSpacing;
+      probe.style.fontVariantNumeric = cs.fontVariantNumeric;
+      probe.textContent = el.textContent || '00:00';
+      document.body.appendChild(probe);
+
+      let lo = 20;
+      let hi = 220;
       let best = lo;
       for (let i = 0; i < 16; i++) {
         const mid = (lo + hi) / 2;
-        el.style.fontSize = mid + 'px';
-        if (el.scrollWidth <= containerWidth * 0.96) {
+        probe.style.fontSize = mid + 'px';
+        if (probe.offsetWidth <= containerWidth * 0.96) {
           best = mid;
           lo = mid;
         } else {
           hi = mid;
         }
       }
+      document.body.removeChild(probe);
       el.style.fontSize = best + 'px';
     });
   });
