@@ -404,6 +404,16 @@
 </footer>
 
 <script>
+// iOS merkt sich bei Standalone-PWAs manchmal die letzte Scroll-Position und
+// stellt sie beim Wiederöffnen automatisch wieder her - das sieht optisch
+// identisch aus wie der (bereits behobene) Header-Überlapp-Bug, ist aber eine
+// andere Ursache. Automatische Wiederherstellung deaktivieren und bei jedem
+// (Wieder-)Anzeigen der Seite explizit nach oben scrollen.
+if ('scrollRestoration' in history) {
+  history.scrollRestoration = 'manual';
+}
+window.addEventListener('pageshow', () => window.scrollTo(0, 0));
+
 // ---------- Daten ----------
 const warmup = [
   { id: 'w0', name: "Plank", detail: "2 Min", link: "https://www.fitkurs.de/uebungen/unterarmstuetz/", timed: true, targetSec: 120 },
