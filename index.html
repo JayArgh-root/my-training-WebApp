@@ -429,6 +429,67 @@
     border-radius: 999px;
     font-size: 0.8rem;
   }
+  .sync-link {
+    display: block;
+    margin: 10px auto 0 auto;
+    background: none;
+    border: none;
+    color: var(--muted);
+    font-size: 0.78rem;
+    text-decoration: underline;
+    padding: 6px;
+    cursor: pointer;
+  }
+  .sync-panel {
+    display: none;
+    max-width: 400px;
+    margin: 10px auto 0 auto;
+    background: var(--card);
+    border-radius: 14px;
+    padding: 14px;
+    text-align: left;
+  }
+  .sync-panel.open {
+    display: block;
+  }
+  .sync-status {
+    font-size: 0.8rem;
+    color: var(--muted);
+    margin-bottom: 10px;
+  }
+  .sync-token-input {
+    width: 100%;
+    padding: 10px 12px;
+    border-radius: 10px;
+    border: 1.5px solid rgba(52,55,58,0.3);
+    background: #fff;
+    color: var(--text);
+    font-size: 0.9rem;
+    box-sizing: border-box;
+  }
+  .sync-panel-buttons {
+    display: flex;
+    gap: 10px;
+    margin-top: 10px;
+  }
+  .sync-panel-buttons button {
+    flex: 1;
+    padding: 10px;
+    border-radius: 10px;
+    font-size: 0.85rem;
+    font-weight: 600;
+    border: none;
+    cursor: pointer;
+  }
+  .sync-save-btn {
+    background: var(--accent);
+    color: #06231a;
+  }
+  .sync-remove-btn {
+    background: none;
+    border: 1.5px solid rgba(52,55,58,0.35);
+    color: var(--muted);
+  }
 </style>
 </head>
 <body>
@@ -495,6 +556,16 @@
 
 <footer>
   <button class="reset" id="reset-btn">Heutige Häkchen zurücksetzen</button>
+  <button class="sync-link" id="sync-toggle-btn" type="button">Sync-Einstellungen</button>
+
+  <div class="sync-panel" id="sync-panel">
+    <div class="sync-status" id="sync-status-text"></div>
+    <input type="password" id="sync-token-input" class="sync-token-input" placeholder="GitHub-Token einfügen" autocomplete="off" autocapitalize="off" spellcheck="false">
+    <div class="sync-panel-buttons">
+      <button type="button" class="sync-save-btn" id="sync-save-btn">Speichern</button>
+      <button type="button" class="sync-remove-btn" id="sync-remove-btn">Entfernen</button>
+    </div>
+  </div>
 </footer>
 
 <script>
@@ -510,7 +581,7 @@ window.addEventListener('pageshow', () => window.scrollTo(0, 0));
 
 // ---------- Daten ----------
 const warmup = [
-  { id: 'w0', name: "Plank", detail: "2 Min", link: "https://www.fitkurs.de/uebungen/unterarmstuetz/", timed: true, targetSec: 120 },
+  { id: 'w0', name: "Plank", detail: "2 Min", link: "https://www.fitkurs.de/uebungen/unterarmstuetz/", timed: true, targetSec: 120, durationTrack: true },
   { id: 'w1', name: "Haltung des Kindes", detail: "1 Min", link: "https://www.fitkurs.de/uebungen/stellung-des-kindes/", timed: true, targetSec: 60 },
   { id: 'w2', name: "Kobra", detail: "15 Sek" },
   { id: 'w3', name: "Katze-Kuh", detail: "10 Wdh.", link: "https://www.fitkurs.de/uebungen/katze-kuh/" },
@@ -571,13 +642,17 @@ function startOfDay(d) {
   return new Date(d.getFullYear(), d.getMonth(), d.getDate());
 }
 
-function getTodayLetter() {
-  const today = startOfDay(new Date());
+function getLetterForDate(d) {
+  const day = startOfDay(d);
   const anchor = startOfDay(ANCHOR_DATE);
-  const diffDays = Math.round((today - anchor) / 86400000);
+  const diffDays = Math.round((day - anchor) / 86400000);
   let idx = (ANCHOR_INDEX + diffDays) % 3;
   if (idx < 0) idx += 3;
   return ROTATION_ORDER[idx];
+}
+
+function getTodayLetter() {
+  return getLetterForDate(new Date());
 }
 
 // ---------- Speicherung ----------
@@ -607,6 +682,7 @@ function setExerciseDone(exerciseId, done) {
   if (!all[key]) all[key] = {};
   all[key][exerciseId] = done;
   saveAllProgress(all);
+  markDirty(key);
 }
 
 function resetToday() {
@@ -614,6 +690,7 @@ function resetToday() {
   const key = dateKey(new Date());
   all[key] = {};
   saveAllProgress(all);
+  markDirty(key);
   render();
 }
 
@@ -630,6 +707,7 @@ function setExerciseExtra(exerciseId, suffix, value) {
   if (!all[key]) all[key] = {};
   all[key][exerciseId + suffix] = value;
   saveAllProgress(all);
+  markDirty(key);
 }
 
 function getSideEntries(id) {
@@ -648,6 +726,259 @@ function getSetEntries(id, defaultReps) {
 function setSetEntries(id, arr) {
   setExerciseExtra(id, '__sets', arr);
 }
+
+function getDurationEntry(id) {
+  return getExerciseExtra(id, '__duration') || null;
+}
+
+function setDurationEntry(id, ms) {
+  setExerciseExtra(id, '__duration', ms);
+}
+
+// ---------- Protokollierung / GitHub-Sync ----------
+const DIRTY_KEY = 'fitness_dirty_dates';
+const MIGRATED_KEY = 'fitness_migrated_v1';
+const SYNC_TOKEN_KEY = 'github_sync_token';
+const SYNC_OWNER = 'JayArgh-root';
+const SYNC_REPO = 'my-training-WebApp';
+const SYNC_PATH = 'training-log.json';
+const SYNC_BRANCH = 'main';
+
+function getDirtyDates() {
+  try {
+    return JSON.parse(localStorage.getItem(DIRTY_KEY)) || [];
+  } catch (e) {
+    return [];
+  }
+}
+
+function markDirty(dateStr) {
+  const dirty = getDirtyDates();
+  if (!dirty.includes(dateStr)) {
+    dirty.push(dateStr);
+    localStorage.setItem(DIRTY_KEY, JSON.stringify(dirty));
+  }
+  scheduleSyncFlush();
+}
+
+function clearDirty(dateStrs) {
+  const remaining = getDirtyDates().filter(d => !dateStrs.includes(d));
+  localStorage.setItem(DIRTY_KEY, JSON.stringify(remaining));
+}
+
+function getApplicableExerciseIds(dateStr) {
+  const letter = getLetterForDate(new Date(dateStr + 'T00:00:00'));
+  return [...warmup, ...days[letter].exercises, ...optional].map(ex => ex.id);
+}
+
+// Baut den vollständigen Protokoll-Datensatz für einen Tag aus dem lokalen
+// Speicher - unabhängig davon, ob der Tag "heute" ist oder ein Datum aus der
+// Vergangenheit (relevant für die einmalige Migration alter Daten).
+function buildDayRecord(dateStr) {
+  const all = loadAllProgress();
+  const dayProgress = all[dateStr] || {};
+  const letter = getLetterForDate(new Date(dateStr + 'T00:00:00'));
+  const ids = getApplicableExerciseIds(dateStr);
+
+  const done = {};
+  ids.forEach(id => { done[id] = !!dayProgress[id]; });
+
+  const record = { date: dateStr, dayType: letter, done };
+
+  const durations = {};
+  const durationIds = [...warmup, ...days[letter].exercises].filter(ex => ex.durationTrack).map(ex => ex.id);
+  durationIds.forEach(id => {
+    const val = dayProgress[id + '__duration'];
+    if (val) durations[id] = val;
+  });
+  if (Object.keys(durations).length) record.durations = durations;
+
+  const sidePlank = {};
+  const sideIds = [...warmup, ...days[letter].exercises].filter(ex => ex.sideTrack).map(ex => ex.id);
+  sideIds.forEach(id => {
+    const val = dayProgress[id + '__sides'];
+    if (val && val.length) sidePlank[id] = val;
+  });
+  if (Object.keys(sidePlank).length) record.sidePlank = sidePlank;
+
+  const sets = {};
+  const setIds = [...warmup, ...days[letter].exercises].filter(ex => ex.sets).map(ex => ex.id);
+  setIds.forEach(id => {
+    const val = dayProgress[id + '__sets'];
+    if (val && val.length) sets[id] = val;
+  });
+  if (Object.keys(sets).length) record.sets = sets;
+
+  return record;
+}
+
+function getSyncToken() {
+  return localStorage.getItem(SYNC_TOKEN_KEY) || '';
+}
+
+function setSyncToken(token) {
+  if (token) localStorage.setItem(SYNC_TOKEN_KEY, token);
+  else localStorage.removeItem(SYNC_TOKEN_KEY);
+}
+
+let syncFlushTimer = null;
+let syncInProgress = false;
+
+function scheduleSyncFlush() {
+  if (syncFlushTimer) clearTimeout(syncFlushTimer);
+  syncFlushTimer = setTimeout(() => { syncFlush(); }, 1500);
+  updateSyncStatusUI();
+}
+
+function base64EncodeAscii(str) {
+  return btoa(str);
+}
+
+function base64DecodeAscii(b64) {
+  return atob(b64.replace(/\n/g, ''));
+}
+
+async function syncFlush() {
+  if (syncInProgress) return;
+  const token = getSyncToken();
+  if (!token) { updateSyncStatusUI(); return; }
+  if (!navigator.onLine) { updateSyncStatusUI(); return; }
+  const dirty = getDirtyDates();
+  if (!dirty.length) { updateSyncStatusUI(); return; }
+
+  syncInProgress = true;
+  updateSyncStatusUI();
+
+  const apiUrl = `https://api.github.com/repos/${SYNC_OWNER}/${SYNC_REPO}/contents/${SYNC_PATH}`;
+  const headers = {
+    'Authorization': `Bearer ${token}`,
+    'Accept': 'application/vnd.github+json',
+    'X-GitHub-Api-Version': '2022-11-28',
+  };
+
+  const maxAttempts = 3;
+  for (let attempt = 0; attempt < maxAttempts; attempt++) {
+    try {
+      let sha = undefined;
+      let remote = { days: {} };
+
+      const getRes = await fetch(`${apiUrl}?ref=${SYNC_BRANCH}`, { headers });
+      if (getRes.status === 200) {
+        const body = await getRes.json();
+        sha = body.sha;
+        try {
+          remote = JSON.parse(base64DecodeAscii(body.content)) || { days: {} };
+          if (!remote.days) remote.days = {};
+        } catch (e) {
+          remote = { days: {} };
+        }
+      } else if (getRes.status !== 404) {
+        throw new Error(`GET fehlgeschlagen: ${getRes.status}`);
+      }
+
+      const pushedDates = dirty.slice();
+      pushedDates.forEach(dateStr => {
+        remote.days[dateStr] = buildDayRecord(dateStr);
+      });
+
+      const content = base64EncodeAscii(JSON.stringify(remote, null, 2));
+      const putBody = {
+        message: `Trainingsprotokoll aktualisiert (${pushedDates.join(', ')})`,
+        content,
+        branch: SYNC_BRANCH,
+      };
+      if (sha) putBody.sha = sha;
+
+      const putRes = await fetch(apiUrl, {
+        method: 'PUT',
+        headers: { ...headers, 'Content-Type': 'application/json' },
+        body: JSON.stringify(putBody),
+      });
+
+      if (putRes.status === 200 || putRes.status === 201) {
+        clearDirty(pushedDates);
+        syncInProgress = false;
+        setLastSyncStatus('ok');
+        updateSyncStatusUI();
+        return;
+      } else if (putRes.status === 409 && attempt < maxAttempts - 1) {
+        continue; // Konflikt: erneut lesen, mergen, schreiben
+      } else {
+        throw new Error(`PUT fehlgeschlagen: ${putRes.status}`);
+      }
+    } catch (e) {
+      syncInProgress = false;
+      setLastSyncStatus('error', e.message);
+      updateSyncStatusUI();
+      return;
+    }
+  }
+  syncInProgress = false;
+  setLastSyncStatus('error', 'Konflikt konnte nicht aufgelöst werden');
+  updateSyncStatusUI();
+}
+
+function setLastSyncStatus(state, message) {
+  const info = { state, message: message || '', at: new Date().toISOString() };
+  localStorage.setItem('fitness_sync_status', JSON.stringify(info));
+}
+
+function getLastSyncStatus() {
+  try {
+    return JSON.parse(localStorage.getItem('fitness_sync_status')) || null;
+  } catch (e) {
+    return null;
+  }
+}
+
+function updateSyncStatusUI() {
+  const el = document.getElementById('sync-status-text');
+  if (!el) return;
+  const token = getSyncToken();
+  if (!token) {
+    el.textContent = 'Kein Token hinterlegt – Protokoll wird nur lokal gespeichert.';
+    return;
+  }
+  const dirty = getDirtyDates();
+  if (syncInProgress) {
+    el.textContent = 'Synchronisiere…';
+    return;
+  }
+  if (dirty.length) {
+    el.textContent = navigator.onLine
+      ? `Sync ausstehend (${dirty.length} Tag${dirty.length === 1 ? '' : 'e'})…`
+      : `Offline – ${dirty.length} Tag${dirty.length === 1 ? '' : 'e'} werden bei nächster Verbindung übertragen.`;
+    return;
+  }
+  const status = getLastSyncStatus();
+  if (status && status.state === 'error') {
+    el.textContent = `Sync-Fehler: ${status.message || 'unbekannt'} – Token prüfen.`;
+    return;
+  }
+  if (status && status.state === 'ok') {
+    const d = new Date(status.at);
+    el.textContent = `✓ Synchronisiert (${d.toLocaleDateString('de-DE')} ${d.toLocaleTimeString('de-DE', { hour: '2-digit', minute: '2-digit' })})`;
+    return;
+  }
+  el.textContent = 'Noch nicht synchronisiert.';
+}
+
+// Einmalige Migration: bereits vorhandene lokale Trainingstage (aus der Zeit
+// vor der Protokollierungs-Funktion) beim ersten Start als "dirty" markieren,
+// damit sie beim nächsten Sync mit in die GitHub-Datei aufgenommen werden.
+function migrateExistingDataIfNeeded() {
+  if (localStorage.getItem(MIGRATED_KEY)) return;
+  const all = loadAllProgress();
+  const dates = Object.keys(all);
+  if (dates.length) {
+    const dirty = getDirtyDates();
+    dates.forEach(d => { if (!dirty.includes(d)) dirty.push(d); });
+    localStorage.setItem(DIRTY_KEY, JSON.stringify(dirty));
+  }
+  localStorage.setItem(MIGRATED_KEY, '1');
+}
+
+window.addEventListener('online', () => scheduleSyncFlush());
 
 // ---------- Rendering ----------
 const LINK_ICON_SVG = '<svg viewBox="0 0 20 20" width="14" height="14" aria-hidden="true"><path d="M8 5H5a1 1 0 00-1 1v9a1 1 0 001 1h9a1 1 0 001-1v-3M12 4h4v4M9 11l7-7" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round"/></svg>';
@@ -870,6 +1201,9 @@ function renderList(container, items, progress, sectionKey) {
             arr.push(st.elapsedMs);
             setSideEntries(ex.id, arr);
             if (sidesListEl) renderSidesList(sidesListEl, ex.id, ex.name);
+          }
+          if (ex.durationTrack) {
+            setDurationEntry(ex.id, st.elapsedMs);
           }
         } else {
           startTimer(ex.id);
@@ -1179,7 +1513,41 @@ document.querySelectorAll('.collapse-btn').forEach(btn => {
   });
 });
 
+const syncToggleBtn = document.getElementById('sync-toggle-btn');
+const syncPanel = document.getElementById('sync-panel');
+const syncTokenInput = document.getElementById('sync-token-input');
+const syncSaveBtn = document.getElementById('sync-save-btn');
+const syncRemoveBtn = document.getElementById('sync-remove-btn');
+
+syncToggleBtn.addEventListener('click', () => {
+  const isOpen = syncPanel.classList.toggle('open');
+  if (isOpen) {
+    syncTokenInput.value = '';
+    updateSyncStatusUI();
+  }
+});
+
+syncSaveBtn.addEventListener('click', () => {
+  const token = syncTokenInput.value.trim();
+  if (!token) return;
+  setSyncToken(token);
+  syncTokenInput.value = '';
+  updateSyncStatusUI();
+  scheduleSyncFlush();
+});
+
+syncRemoveBtn.addEventListener('click', () => {
+  if (confirm('Token entfernen? Es wird dann nicht mehr automatisch mit GitHub synchronisiert.')) {
+    setSyncToken('');
+    updateSyncStatusUI();
+  }
+});
+
+migrateExistingDataIfNeeded();
+
 render();
+updateSyncStatusUI();
+syncFlush();
 
 // Fixierten Header-Bereich exakt so hoch reservieren, wie er tatsächlich ist.
 // Läuft nicht nur einmalig, sondern beobachtet den Header laufend: auf iOS kann sich
