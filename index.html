@@ -33,7 +33,10 @@
     --done: #dbe8d6;
     --section-bg: #95ddbe;
     --line: rgba(52,55,58,0.28);
-    --ring-strength: #d99a4e;
+    --view-bg: #f3ead9;
+    --ring-outer: #d9483f;
+    --ring-inner: #3fae62;
+    --ring-dot: #3f7fd9;
   }
   * { box-sizing: border-box; -webkit-tap-highlight-color: transparent; }
   html, body {
@@ -517,7 +520,7 @@
     position: fixed;
     inset: 0;
     z-index: 2000;
-    background: #c9b291 var(--bg-image) center / cover no-repeat;
+    background: var(--view-bg);
   }
   .view-overlay.open {
     display: flex;
@@ -1273,11 +1276,11 @@ function computeDayStats(record) {
 }
 
 function buildRingsSVG(size, warmupFrac, strengthFrac, optionalDone) {
-  const stroke = size * 0.11;
+  const stroke = size * 0.17;
   const cx = size / 2, cy = size / 2;
   const rOuter = size / 2 - stroke / 2 - 1;
-  const rInner = rOuter - stroke - 2;
-  const dotR = Math.max(2, size * 0.06);
+  const rInner = rOuter - stroke - 1;
+  const dotR = rInner - stroke / 2;
 
   const ring = (r, frac, color) => {
     const c = 2 * Math.PI * r;
@@ -1287,12 +1290,12 @@ function buildRingsSVG(size, warmupFrac, strengthFrac, optionalDone) {
   };
 
   const dot = optionalDone
-    ? `<circle cx="${cx}" cy="${cy}" r="${dotR}" fill="var(--accent)" />`
-    : `<circle cx="${cx}" cy="${cy}" r="${dotR}" fill="none" stroke="rgba(52,55,58,0.25)" stroke-width="1.3" />`;
+    ? `<circle cx="${cx}" cy="${cy}" r="${dotR}" fill="var(--ring-dot)" />`
+    : `<circle cx="${cx}" cy="${cy}" r="${dotR}" fill="none" stroke="rgba(52,55,58,0.25)" stroke-width="${Math.max(1.3, size * 0.015)}" />`;
 
   return `<svg viewBox="0 0 ${size} ${size}" width="${size}" height="${size}">` +
-    ring(rOuter, warmupFrac, 'var(--accent)') +
-    ring(rInner, strengthFrac, 'var(--ring-strength)') +
+    ring(rOuter, warmupFrac, 'var(--ring-outer)') +
+    ring(rInner, strengthFrac, 'var(--ring-inner)') +
     dot +
     `</svg>`;
 }
@@ -1427,9 +1430,9 @@ function openDayDetail(dateStr, record) {
   const summary = document.createElement('div');
   summary.className = 'day-detail-summary';
   summary.innerHTML =
-    `<div><span class="dot" style="background:var(--accent)"></span>Warm-up: ${stats.warmupDone}/${stats.warmupTotal}</div>` +
-    `<div><span class="dot" style="background:var(--ring-strength)"></span>${dayLabel}: ${stats.strengthDone}/${stats.strengthTotal}</div>` +
-    `<div><span class="dot" style="background:${stats.optionalDone ? 'var(--accent)' : 'rgba(52,55,58,0.25)'}"></span>Optional: ${stats.optionalDone ? 'erledigt' : 'keine'}</div>`;
+    `<div><span class="dot" style="background:var(--ring-outer)"></span>Warm-up: ${stats.warmupDone}/${stats.warmupTotal}</div>` +
+    `<div><span class="dot" style="background:var(--ring-inner)"></span>${dayLabel}: ${stats.strengthDone}/${stats.strengthTotal}</div>` +
+    `<div><span class="dot" style="background:${stats.optionalDone ? 'var(--ring-dot)' : 'rgba(52,55,58,0.25)'}"></span>Optional: ${stats.optionalDone ? 'erledigt' : 'keine'}</div>`;
   body.appendChild(summary);
 
   body.appendChild(buildDayDetailSection('Warm-up', warmup, record));
