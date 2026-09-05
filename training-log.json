@@ -652,8 +652,8 @@
       "date": "2026-09-05",
       "dayType": "C",
       "done": {
-        "w0": false,
-        "w1": false,
+        "w0": true,
+        "w1": true,
         "w2": false,
         "w3": false,
         "w4": false,
