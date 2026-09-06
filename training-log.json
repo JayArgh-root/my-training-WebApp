@@ -677,8 +677,8 @@
       "date": "2026-09-06",
       "dayType": "A",
       "done": {
-        "w0": false,
-        "w1": false,
+        "w0": true,
+        "w1": true,
         "w2": true,
         "w3": true,
         "w4": true,
