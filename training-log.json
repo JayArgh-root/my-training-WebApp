@@ -672,6 +672,30 @@
       "durations": {
         "w0": 126159
       }
+    },
+    "2026-09-06": {
+      "date": "2026-09-06",
+      "dayType": "A",
+      "done": {
+        "w0": false,
+        "w1": false,
+        "w2": false,
+        "w3": false,
+        "w4": false,
+        "w5": false,
+        "w6": false,
+        "a2": false,
+        "a3": false,
+        "a4": false,
+        "o0": false,
+        "o1": false,
+        "o2": false,
+        "o3": false,
+        "o4": false
+      },
+      "durations": {
+        "w0": 124853
+      }
     }
   }
 }
