@@ -744,8 +744,8 @@
       "done": {
         "w0": true,
         "w1": true,
-        "w2": false,
-        "w3": false,
+        "w2": true,
+        "w3": true,
         "w4": false,
         "w5": false,
         "w6": false,
