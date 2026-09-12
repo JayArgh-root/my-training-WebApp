@@ -867,7 +867,7 @@
         "w4": true,
         "w5": true,
         "w6": true,
-        "a2": false,
+        "a2": true,
         "a3": false,
         "a4": false,
         "o0": false,
@@ -881,7 +881,8 @@
       },
       "sidePlank": {
         "a2": [
-          65760
+          65760,
+          65877
         ]
       }
     }
