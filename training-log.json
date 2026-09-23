@@ -1131,7 +1131,7 @@
       "dayType": "C",
       "done": {
         "w0": true,
-        "w1": false,
+        "w1": true,
         "w2": true,
         "w3": true,
         "w4": true,
