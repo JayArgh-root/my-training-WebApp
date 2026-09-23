@@ -1139,7 +1139,7 @@
         "w6": true,
         "c2": true,
         "c3": true,
-        "c4": false,
+        "c4": true,
         "c5": true,
         "o0": false,
         "o1": false,
@@ -1163,6 +1163,7 @@
           15
         ],
         "c4": [
+          15,
           15,
           15
         ]
