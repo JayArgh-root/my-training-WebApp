@@ -1204,9 +1204,9 @@
         "w4": true,
         "w5": true,
         "w6": true,
-        "b2": false,
-        "b3": false,
-        "b4": false,
+        "b2": true,
+        "b3": true,
+        "b4": true,
         "o0": false,
         "o1": false,
         "o2": true,
@@ -1222,6 +1222,14 @@
           6,
           6,
           3
+        ],
+        "b3": [
+          10,
+          10
+        ],
+        "b4": [
+          10,
+          10
         ]
       }
     }
