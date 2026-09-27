@@ -1269,9 +1269,9 @@
         "w4": true,
         "w5": true,
         "w6": true,
-        "a2": false,
+        "a2": true,
         "a3": true,
-        "a4": false,
+        "a4": true,
         "o0": false,
         "o1": false,
         "o2": true,
@@ -1291,6 +1291,10 @@
         "a3": [
           15,
           15
+        ],
+        "a4": [
+          10,
+          10
         ]
       }
     }
