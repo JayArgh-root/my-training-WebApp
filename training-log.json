@@ -1270,7 +1270,7 @@
         "w5": true,
         "w6": true,
         "a2": false,
-        "a3": false,
+        "a3": true,
         "a4": false,
         "o0": false,
         "o1": false,
@@ -1280,6 +1280,11 @@
       },
       "durations": {
         "w0": 123578
+      },
+      "sidePlank": {
+        "a2": [
+          64180
+        ]
       },
       "sets": {
         "a3": [
