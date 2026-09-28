@@ -1304,7 +1304,7 @@
       "done": {
         "w0": true,
         "w1": true,
-        "w2": false,
+        "w2": true,
         "w3": false,
         "w4": false,
         "w5": false,
